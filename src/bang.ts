@@ -121,4 +121,14 @@ export const bangs = [
     t: ["am", "amz", "amzn", "amazon" ],
     u: "https://www.amazon.in/s?k={{{s}}}",
   },
+  // Content
+  {
+    c: "Multimedia",
+    d: "www.youtube.com",
+    r: 463021,
+    s: "YouTube",
+    sc: "Video",
+    t: ["yt", "youtube"],
+    u: "https://www.youtube.com/results?search_query={{{s}}}",
+  },
 ];
