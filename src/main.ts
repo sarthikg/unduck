@@ -1,5 +1,4 @@
 import { bangs } from "./bang";
-import { inject } from "@vercel/analytics"
 import "./global.css";
 
 function noSearchDefaultPageRender() {
@@ -89,7 +88,6 @@ function doRedirect() {
   const searchUrl = getBangredirectUrl();
   if (!searchUrl) return;
   window.location.replace(searchUrl);
-  inject();
 }
 
 doRedirect();
