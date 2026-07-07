@@ -1,143 +1,126 @@
-export const bangs = [
+export interface Bang {
+  /** Short name / service title */
+  s: string;
+  /** Domain */
+  d: string;
+  /** Trigger(s) — the bang keyword(s) the user types after ! */
+  t: string | string[];
+  /** Search URL with {{{s}}} placeholder */
+  u: string;
+  /** Suggestion/autocomplete API URL with {{{s}}} placeholder (optional) */
+  su?: string;
+  /** HTTP method the target search engine expects: "GET" (default) or "POST" */
+  m?: "GET" | "POST";
+}
+
+export const bangs: Bang[] = [
   // AI Apps
   {
-    c: "AI",
     d: "www.chatgpt.com",
-    r: 0,
     s: "ChatGPT",
-    sc: "AI",
     t: ["ai", "chat", "gpt", "chatgpt"],
     u: "https://www.chatgpt.com/search?q={{{s}}}",
   },
-  {
-    c: "AI",
-    d: "www.grok.com",
-    r: 0,
-    s: "Grok",
-    sc: "AI",
-    t: "grok",
-    u: "https://grok.com/chat?q={{{s}}}",
-  },
   // Social Media
   {
-    c: "Online Services",
     d: "twitter.com",
-    r: 9964,
     s: "Twitter",
-    sc: "Social",
     t: ["x", "tw", "twt", "twtr", "twitter"],
     u: "https://twitter.com/search?q={{{s}}}",
   },
   {
-    c: "Online Services",
     d: "twitter.com",
-    r: 0,
     s: "Twitter users",
-    sc: "Social",
     t: "twuser",
     u: "https://twitter.com/search/users?q={{{s}}}",
   },
   {
-    c: "Online Services",
     d: "www.reddit.com",
-    r: 40882,
     s: "Reddit",
-    sc: "Social",
     t: ["r", "reddit"],
     u: "https://www.reddit.com/search?q={{{s}}}",
   },
   {
-    c: "Entertainment",
-    d: "reddit.com",
-    r: 10750,
+    d: "www.reddit.com",
     s: "Reddit",
-    sc: "Forum",
-    t: "sr",
-    u: "http://reddit.com/r/{{{s}}}",
-  },
-  {
-    c: "Online Services",
-    d: "www.linkedin.com",
-    r: 3073,
-    s: "LinkedIn",
-    sc: "Social",
-    t: ["li", "linkedin"],
-    u: "https://www.linkedin.com/search/results/all/?keywords={{{s}}}",
+    t: ["sr"],
+    u: "https://www.reddit.com/r/{{{s}}}",
+    su: "https://www.reddit.com/api/subreddit_autocomplete_v2.json?query={{{s}}}",
   },
   // Programming
   {
-    c: "Tech",
     d: "github.com",
-    r: 15975,
     s: "GitHub",
-    sc: "Programming",
     t: ["gh", "github"],
     u: "https://github.com/search?utf8=%E2%9C%93&q={{{s}}}",
   },
-  // Search Engine
+  // Search Engines
   {
-    c: "Online Services",
     d: "www.startpage.com",
-    r: 12345678,
     s: "Startpage",
-    sc: "Startpage",
     t: ["s", "sp", "startpage"],
     u: "https://www.startpage.com/sp/search?query={{{s}}}",
+    su: "https://www.startpage.com/osuggestions?q={{{s}}}",
+    m: "POST",
   },
   {
-    c: "Online Services",
     d: "www.google.com",
-    r: 1942262,
     s: "Google",
-    sc: "Google",
     t: ["g", "gg", "google"],
     u: "https://www.google.com/search?q={{{s}}}",
+    su: "https://www.google.com/complete/search?client=firefox&q={{{s}}}",
   },
   {
-    c: "Online Services",
     d: "google.com",
-    r: 52329,
     s: "Google Images",
-    sc: "Google",
     t: ["gi", "gimg", "gimages"],
     u: "https://google.com/search?tbm=isch&q={{{s}}}&tbs=imgo:1",
   },
   {
-    c: "Online Services",
     d: "google.com",
-    r: 55096,
     s: "Google Maps",
-    sc: "Maps",
     t: ["gm", "gmaps"],
     u: "https://google.com/maps/place/{{{s}}}",
   },
   // Shopping
   {
-    c: "Shopping",
     d: "www.flipkart.com",
-    r: 126,
     s: "Flipkart",
-    sc: "Online",
     t: "fk",
-    u: "http://www.flipkart.com/search?q={{{s}}} ",
+    u: "https://www.flipkart.com/search?q={{{s}}}",
   },
   {
-    c: "Shopping",
-    d: "www.amazon.com",
-    r: 0,
+    d: "www.amazon.in",
     s: "Amazon",
-    sc: "Online",
     t: ["am", "amz", "amzn", "amazon"],
     u: "https://www.amazon.in/s?k={{{s}}}",
+    su: "https://completion.amazon.com/api/2017/suggestions?mid=ATVPDKIKX0DER&q={{{s}}}",
   },
   // Content
   {
-    c: "Multimedia",
     d: "www.youtube.com",
-    r: 463021,
     s: "YouTube",
-    sc: "Video",
     t: ["yt", "youtube"],
     u: "https://www.youtube.com/results?search_query={{{s}}}",
+    su: "https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q={{{s}}}",
   },
 ];
+
+/** Check whether a bang's trigger(s) match the given search keyword */
+export function searchBang(bang: Bang, search: string): boolean {
+  if (Array.isArray(bang.t)) {
+    return bang.t.includes(search);
+  }
+  return bang.t === search;
+}
+
+/** Find a bang by its trigger keyword */
+export function findBang(trigger: string): Bang | undefined {
+  return bangs.find((b) => searchBang(b, trigger));
+}
+
+/** Return the default bang (Startpage, trigger "s").
+ *  Must exist in the bangs array — used as fallback when no bang trigger is specified. */
+export function getDefaultBang(): Bang | undefined {
+  return findBang("s") ?? bangs[0];
+}

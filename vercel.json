@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/search", "destination": "/api/search" },
+    { "source": "/suggest", "destination": "/api/suggest" }
+  ]
+}
