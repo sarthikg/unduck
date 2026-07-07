@@ -1,9 +1,9 @@
 import { inject } from "@vercel/analytics";
 import { injectSpeedInsights } from "@vercel/speed-insights";
-import { findBang, getDefaultBang } from "./bang";
+import { buildSearchUrl, postRedirectHtml } from "./shared";
 import "./global.css";
 
-function noSearchDefaultPageRender() {
+function noSearchDefaultPageRender(): void {
   const app = document.querySelector<HTMLDivElement>("#app")!;
   const searchUrl = `${location.origin}/search?q=%s`;
   const suggestUrl = `${location.origin}/suggest?q=%s`;
@@ -62,38 +62,32 @@ function noSearchDefaultPageRender() {
   });
 }
 
-function getBangredirectUrl() {
+function doRedirect(): void {
   const url = new URL(window.location.href);
   const query = url.searchParams.get("q")?.trim() ?? "";
+
   if (!query) {
     noSearchDefaultPageRender();
-    return null;
+    return;
   }
 
-  const match = query.match(/!(\S+)/i);
-  const bangCandidate = match?.[1]?.toLowerCase();
+  const result = buildSearchUrl(query);
+  if (!result) {
+    noSearchDefaultPageRender();
+    return;
+  }
 
-  const selectedBang = bangCandidate
-    ? findBang(bangCandidate)
-    : getDefaultBang();
+  if (result.method === "POST") {
+    // Replace the current document with an auto-submitting POST form
+    document.open("text/html");
+    document.write(
+      postRedirectHtml(result.url, result.query, result.postParam ?? "q"),
+    );
+    document.close();
+    return;
+  }
 
-  // Remove the first bang from the query
-  const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
-
-  const searchUrl = selectedBang?.u.replace(
-    "{{{s}}}",
-    // Replace %2F with / to fix formats like "!ghr+t3dotgg/unduck"
-    encodeURIComponent(cleanQuery).replace(/%2F/g, "/"),
-  );
-  if (!searchUrl) return null;
-
-  return searchUrl;
-}
-
-function doRedirect() {
-  const searchUrl = getBangredirectUrl();
-  if (!searchUrl) return;
-  window.location.replace(searchUrl);
+  window.location.replace(result.url);
 }
 
 doRedirect();
