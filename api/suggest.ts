@@ -1,39 +1,76 @@
-// Minimal suggest — no imports, no deps.
-// Deploy this, test it, then we add complexity back.
+import { bangs, findBang, getDefaultBang } from "./bang-data";
 
-const DEFAULT_BANG = {
-  su: "https://www.startpage.com/osuggestions?q={{{s}}}",
-};
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+function parseQuery(raw: string) {
+  const query = raw.trim();
+  const match = query.match(/!(\S+)/i);
+  const trigger = match?.[1]?.toLowerCase();
+  const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
+  return { trigger, cleanQuery };
+}
+
+function localBangSuggestions(partialTrigger: string) {
+  const lower = partialTrigger.toLowerCase();
+  const matches = bangs
+    .filter((b) => {
+      const triggers = Array.isArray(b.t) ? b.t : [b.t];
+      return triggers.some((t) => t.startsWith(lower));
+    })
+    .slice(0, 8);
+
+  const suggestions = matches.map((b) => {
+    const trigger = Array.isArray(b.t) ? b.t[0] : b.t;
+    return `!${trigger} ${b.s}`;
+  });
+  const descriptions = matches.map((b) => b.d);
+
+  return [partialTrigger, suggestions, descriptions] as const;
+}
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const q = url.searchParams.get("q") ?? "";
+    const rawQuery = url.searchParams.get("q")?.trim() ?? "";
 
-    if (!q) {
-      return new Response(JSON.stringify([q, [], [], []]), {
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!rawQuery) {
+      return json([rawQuery, [], [], []]);
     }
 
-    // Proxy to Startpage suggestions
-    const target = DEFAULT_BANG.su.replace("{{{s}}}", encodeURIComponent(q));
-    const apiRes = await fetch(target);
+    const { trigger, cleanQuery } = parseQuery(rawQuery);
+    const bang = trigger ? findBang(trigger) : getDefaultBang();
 
-    if (apiRes.ok) {
-      const data = await apiRes.json();
-      return new Response(JSON.stringify(data), {
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!bang) {
+      return json([rawQuery, [], [], []]);
     }
 
-    return new Response(JSON.stringify([q, [], [], []]), {
-      headers: { "Content-Type": "application/json" },
-    });
+    // Proxy to external suggest API if available
+    if (bang.su) {
+      const suggestUrl = bang.su.replace(
+        "{{{s}}}",
+        encodeURIComponent(cleanQuery || rawQuery),
+      );
+      try {
+        const res = await fetch(suggestUrl);
+        if (res.ok) {
+          const data = await res.json();
+          return json(data);
+        }
+      } catch {
+        /* fall through */
+      }
+    }
+
+    // Fallback: local bang matching
+    const searchTerm = trigger ?? rawQuery;
+    const result = localBangSuggestions(searchTerm);
+    return json([result[0], result[1], result[2], []]);
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: e?.message ?? "Unknown error" }, 500);
   }
 }
