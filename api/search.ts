@@ -1,4 +1,4 @@
-import { findBang, getDefaultBang } from "../src/bang";
+import { findBang, getDefaultBang } from "./bang-data";
 
 /** Extract the bang trigger and cleaned query from a raw search string */
 function parseQuery(raw: string) {
