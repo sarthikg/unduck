@@ -6,7 +6,7 @@ export const bangs = [
     r: 0,
     s: "ChatGPT",
     sc: "AI",
-    t: ["ai", "chat", "gpt","chatgpt"],
+    t: ["ai", "chat", "gpt", "chatgpt"],
     u: "https://www.chatgpt.com/search?q={{{s}}}",
   },
   {
@@ -77,6 +77,15 @@ export const bangs = [
   // Search Engine
   {
     c: "Online Services",
+    d: "www.startpage.com",
+    r: 12345678,
+    s: "Startpage",
+    sc: "Startpage",
+    t: ["s", "sp", "startpage"],
+    u: "https://www.startpage.com/sp/search?query={{{s}}}",
+  },
+  {
+    c: "Online Services",
     d: "www.google.com",
     r: 1942262,
     s: "Google",
@@ -118,7 +127,7 @@ export const bangs = [
     r: 0,
     s: "Amazon",
     sc: "Online",
-    t: ["am", "amz", "amzn", "amazon" ],
+    t: ["am", "amz", "amzn", "amazon"],
     u: "https://www.amazon.in/s?k={{{s}}}",
   },
   // Content

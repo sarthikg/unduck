@@ -1,4 +1,4 @@
-import { inject } from "@vercel/analytics"
+import { inject } from "@vercel/analytics";
 import { bangs } from "./bang";
 import "./global.css";
 
@@ -38,15 +38,14 @@ function noSearchDefaultPageRender() {
   });
 }
 
-const LS_DEFAULT_BANG = localStorage.getItem("default-bang") ?? "g";
+const LS_DEFAULT_BANG = localStorage.getItem("default-bang") ?? "s";
 const defaultBang = bangs.find((b) => searchBang(b, LS_DEFAULT_BANG));
-
 
 function searchBang(bang: any, search: string): boolean {
   if (Array.isArray(bang.t)) {
     return bang.t.includes(search);
   } else {
-    return bang.t === search
+    return bang.t === search;
   }
 }
 
@@ -65,7 +64,7 @@ function getBangredirectUrl() {
   let selectedBang;
 
   if (bangCandidate === undefined) {
-    selectedBang = defaultBang
+    selectedBang = defaultBang;
   } else {
     selectedBang = bangs.find((b) => searchBang(b, bangCandidate));
   }
@@ -78,7 +77,7 @@ function getBangredirectUrl() {
   const searchUrl = selectedBang?.u.replace(
     "{{{s}}}",
     // Replace %2F with / to fix formats like "!ghr+t3dotgg/unduck"
-    encodeURIComponent(cleanQuery).replace(/%2F/g, "/")
+    encodeURIComponent(cleanQuery).replace(/%2F/g, "/"),
   );
   if (!searchUrl) return null;
 
