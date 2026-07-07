@@ -1,5 +1,5 @@
 export interface Bang {
-  /** Short name / service title */
+  /** Service name */
   s: string;
   /** Domain */
   d: string;
@@ -7,9 +7,9 @@ export interface Bang {
   t: string | string[];
   /** Search URL with {{{s}}} placeholder */
   u: string;
-  /** Suggestion/autocomplete API URL with {{{s}}} placeholder (optional) */
+  /** Optional suggest/autocomplete API URL */
   su?: string;
-  /** HTTP method the target search engine expects: "GET" (default) or "POST" */
+  /** HTTP method: "GET" (default) or "POST" */
   m?: "GET" | "POST";
 }
 
@@ -43,9 +43,8 @@ export const bangs: Bang[] = [
   {
     d: "www.reddit.com",
     s: "Reddit",
-    t: ["sr"],
+    t: "sr",
     u: "https://www.reddit.com/r/{{{s}}}",
-    su: "https://www.reddit.com/api/subreddit_autocomplete_v2.json?query={{{s}}}",
   },
   // Programming
   {
@@ -60,7 +59,6 @@ export const bangs: Bang[] = [
     s: "Startpage",
     t: ["s", "sp", "startpage"],
     u: "https://www.startpage.com/sp/search?query={{{s}}}",
-    su: "https://www.startpage.com/osuggestions?q={{{s}}}",
     m: "POST",
   },
   {
@@ -68,7 +66,6 @@ export const bangs: Bang[] = [
     s: "Google",
     t: ["g", "gg", "google"],
     u: "https://www.google.com/search?q={{{s}}}",
-    su: "https://www.google.com/complete/search?client=firefox&q={{{s}}}",
   },
   {
     d: "google.com",
@@ -94,7 +91,6 @@ export const bangs: Bang[] = [
     s: "Amazon",
     t: ["am", "amz", "amzn", "amazon"],
     u: "https://www.amazon.in/s?k={{{s}}}",
-    su: "https://completion.amazon.com/api/2017/suggestions?mid=ATVPDKIKX0DER&q={{{s}}}",
   },
   // Content
   {
@@ -102,15 +98,12 @@ export const bangs: Bang[] = [
     s: "YouTube",
     t: ["yt", "youtube"],
     u: "https://www.youtube.com/results?search_query={{{s}}}",
-    su: "https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q={{{s}}}",
   },
 ];
 
 /** Check whether a bang's trigger(s) match the given search keyword */
 export function searchBang(bang: Bang, search: string): boolean {
-  if (Array.isArray(bang.t)) {
-    return bang.t.includes(search);
-  }
+  if (Array.isArray(bang.t)) return bang.t.includes(search);
   return bang.t === search;
 }
 
@@ -119,8 +112,7 @@ export function findBang(trigger: string): Bang | undefined {
   return bangs.find((b) => searchBang(b, trigger));
 }
 
-/** Return the default bang (Startpage, trigger "s").
- *  Must exist in the bangs array — used as fallback when no bang trigger is specified. */
-export function getDefaultBang(): Bang | undefined {
+/** Return the default bang (Startpage, trigger "s") */
+export function getDefaultBang(): Bang {
   return findBang("s") ?? bangs[0];
 }
