@@ -7,7 +7,8 @@ import "./global.css";
 
 function noSearchDefaultPageRender(): void {
   const app = document.querySelector<HTMLDivElement>("#app")!;
-  const searchUrl = `${location.origin}?q=%s`;
+  const searchUrl = `${location.origin}/search?q=%s`;
+  const suggestUrl = `${location.origin}/suggest?q=%s`;
 
   app.innerHTML = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
@@ -19,6 +20,15 @@ function noSearchDefaultPageRender(): void {
           <div class="url-row">
             <input type="text" class="url-input" value="${searchUrl}" readonly />
             <button class="copy-button" data-url="${searchUrl}">
+              <img src="/clipboard.svg" alt="Copy" />
+            </button>
+          </div>
+        </div>
+        <div class="url-container">
+          <label class="url-label">Suggest URL</label>
+          <div class="url-row">
+            <input type="text" class="url-input" value="${suggestUrl}" readonly />
+            <button class="copy-button" data-url="${suggestUrl}">
               <img src="/clipboard.svg" alt="Copy" />
             </button>
           </div>
